@@ -51,17 +51,27 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  side = "center",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  side?: "center" | "left" | "right"
 }) {
+  const sideVariants = {
+    center: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl sm:max-w-sm data-open:zoom-in-95 data-closed:zoom-out-95",
+    left: "top-0 left-0 h-full rounded-r-xl data-open:slide-in-from-left data-closed:slide-out-to-left",
+    right: "top-0 right-0 h-full rounded-l-xl data-open:slide-in-from-right data-closed:slide-out-to-right",
+  }
+
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed z-50 grid w-full max-w-[calc(100%-2rem)] gap-4 bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-200 outline-none data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+          side !== "center" && "max-w-sm",
+          sideVariants[side],
           className
         )}
         {...props}
@@ -74,8 +84,7 @@ function DialogContent({
               className="absolute top-2 right-2"
               size="icon-sm"
             >
-              <XIcon
-              />
+              <XIcon />
               <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>
