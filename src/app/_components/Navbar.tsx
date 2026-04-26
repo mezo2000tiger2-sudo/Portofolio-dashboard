@@ -1,7 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,11 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { LightAndDarkToggler } from './lightAndDarkToggler'
 
 export default function Navbar() {
   return (
-    <div className='bg-primary dark:bg-slate-700 py-2 px-5 flex  justify-between text-white'>
+    <div className='bg-primary dark:bg-slate-900 py-2 px-5 flex  justify-between text-white'>
       <Link href="/" className='text-2xl'>Dashboard</Link>
+        <div className='flex items-center gap-4'>
+          <LightAndDarkToggler/>
       <DropdownMenu>
   <DropdownMenuTrigger className='focus:outline-none'>
     <Avatar>
@@ -38,6 +40,7 @@ export default function Navbar() {
     </DropdownMenuGroup>
   </DropdownMenuContent>
 </DropdownMenu>
+        </div>
       
     </div>
   )

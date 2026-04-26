@@ -13,7 +13,7 @@ interface DashboardCardProps {
 
 export default function DashboardCard({ title, count, icon, isLoading }: DashboardCardProps) {
   return (
-    <Card className="bg-slate-100 dark:bg-slate-800 p-4 flex-1">
+    <Card className="bg-slate-100 dark:bg-slate-900 p-4 flex-1">
       <CardContent>
         <h3 className="text-3xl text-center font-bold text-slate-500 dark:text-slate-200">
           {title}

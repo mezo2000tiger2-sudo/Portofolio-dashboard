@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import Navbar from "./_components/Navbar";
 import Sidebar from "./_components/Sidebar";
 import Providers from "./Providors";
+import { ThemeProvider } from "@/providors/theme-provider.tsx";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -32,10 +33,17 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      suppressHydrationWarning
     >
       <Providers>
 
       <body className="min-h-full h-full flex flex-col">
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
         <Navbar />
         <div className="flex h-full">
           <div className="hidden md:block h-full w-1/6">
@@ -46,6 +54,7 @@ export default function RootLayout({
         {children}
           </div>
         </div>
+        </ThemeProvider>
       </body>
       </Providers>
     </html>
