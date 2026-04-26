@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { MessageCircle, Newspaper, User } from 'lucide-react'
 import DashboardCard from "./_components/Dashboard/DashboardCard"
+import PostTable from "./_components/Dashboard/PostTable"
+import AnalyticsChart from "./_components/Dashboard/AnalyticsChart"
 
 const fetchPosts = () =>
   fetch("https://jsonplaceholder.typicode.com/posts").then(r => r.json())
@@ -40,6 +42,7 @@ export default function Home() {
   ]
 
   return (
+    <>
     <div className="flex flex-col md:flex-row gap-5 mb-5">
       {cards.map((card) => (
         <DashboardCard
@@ -51,5 +54,8 @@ export default function Home() {
         />
       ))}
     </div>
+    <AnalyticsChart/>
+    <PostTable limit={5}/>
+    </>
   )
 }

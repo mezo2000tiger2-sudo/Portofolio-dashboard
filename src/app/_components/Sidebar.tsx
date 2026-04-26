@@ -15,7 +15,7 @@ import {LayoutDashboard , Newspaper , Folders , CreditCard , Settings , User}fro
 export default function Sidebar() {
   return (
     <div className='h-full'>
-      <Command className=" bg-secondary rounded-none ">
+      <Command className=" bg-secondary rounded-none  h-full">
   <CommandInput placeholder="Type a command or search..." />
   <CommandList>
     <CommandEmpty>No results found.</CommandEmpty>

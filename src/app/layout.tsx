@@ -35,10 +35,10 @@ export default function RootLayout({
     >
       <Providers>
 
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full h-full flex flex-col">
         <Navbar />
-        <div className="flex">
-          <div className="hidden md:block h-screen w-1/6">
+        <div className="flex h-full">
+          <div className="hidden md:block h-full w-1/6">
             <Sidebar />
           </div>
           <div className="p-5 w-full md:max-w-285">
