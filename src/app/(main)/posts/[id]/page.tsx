@@ -17,15 +17,16 @@ import { Loader2, MessageSquare, Hash, UserCircle, Eye, EyeOff, ArrowLeft } from
 import Link from "next/link";
 
 const fetchPost = async (id: string | string[]) => {
-  const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+  const res = await fetch(`https://dummyjson.com/posts/${id}`);
   if (!res.ok) throw new Error("Failed to fetch post");
   return res.json();
 };
 
 const fetchComments = async (postId: string | string[]) => {
-  const res = await fetch(`https://jsonplaceholder.typicode.com/comments?postId=${postId}`);
+  const res = await fetch(`https://dummyjson.com/posts/${postId}/comments`);
   if (!res.ok) throw new Error("Failed to fetch comments");
-  return res.json();
+  const data = await res.json();
+  return data.comments;
 };
 
 export default function PostView() {
@@ -50,7 +51,7 @@ export default function PostView() {
   if (postLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -70,13 +71,22 @@ export default function PostView() {
 
       <Card className="border-border shadow-md bg-card overflow-hidden">
         <CardHeader className="space-y-4 pb-8 border-b border-border bg-muted/30">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Badge variant="outline" className="font-mono text-xs bg-background border-border text-muted-foreground">
               <Hash className="w-3 h-3 mr-1" /> {post.id}
             </Badge>
-            <Badge variant="secondary" className="font-mono text-xs text-muted-foreground">
-              <UserCircle className="w-3 h-3 mr-1" /> Author #{post.userId}
-            </Badge>
+            <div className="flex gap-1">
+              {post.tags.map((tag: string) => (
+                <Badge key={tag} variant="secondary" className="capitalize text-[10px]">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            <div className="ml-auto flex items-center gap-4 text-xs font-medium text-muted-foreground">
+              <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {post.views}</span>
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">👍 {post.reactions.likes}</span>
+              <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400">👎 {post.reactions.dislikes}</span>
+            </div>
           </div>
           <CardTitle className="text-4xl font-extrabold tracking-tight text-foreground capitalize leading-tight">
             {post.title}
