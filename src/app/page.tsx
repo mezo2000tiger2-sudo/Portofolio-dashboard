@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <>
-    <div className="flex flex-col md:flex-row gap-5 mb-5">
+    <div className="flex flex-col md:flex-row gap-5">
       {cards.map((card) => (
         <DashboardCard
           key={card.title}

@@ -6,7 +6,6 @@ export default function PostsPage() {
   return (
     <div>
       <PostTable/>
-      <PostsPagination/>
     </div>
   )
 }
