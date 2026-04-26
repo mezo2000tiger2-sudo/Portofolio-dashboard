@@ -13,20 +13,29 @@ interface DashboardCardProps {
 
 export default function DashboardCard({ title, count, icon, isLoading }: DashboardCardProps) {
   return (
-    <Card className="bg-slate-100 dark:bg-slate-900 p-4 flex-1">
-      <CardContent>
-        <h3 className="text-3xl text-center font-bold text-slate-500 dark:text-slate-200">
-          {title}
-        </h3>
-        <div className="flex gap-5 justify-center items-center mt-2">
-          {icon}
+    <Card className="flex-1 overflow-hidden transition-all hover:shadow-md border-border bg-card">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between space-y-0 pb-2">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            {title}
+          </h3>
+          <div className="text-muted-foreground opacity-70">
+            {icon && React.cloneElement(icon as React.ReactElement<any>, { size: 20 })}
+          </div>
+        </div>
+        <div className="mt-2">
           {isLoading ? (
-            <Spinner className='size-12 text-slate-600 dark:text-slate-300' />
+            <div className="h-9 w-24 bg-muted animate-pulse rounded" />
           ) : (
-            <h3 className="text-5xl font-semibold text-slate-500 dark:text-slate-200">
-              {count}
-            </h3>
+            <div className="flex items-baseline space-x-2">
+              <h3 className="text-3xl font-bold tracking-tight text-foreground">
+                {count?.toLocaleString()}
+              </h3>
+            </div>
           )}
+          <p className="text-xs text-muted-foreground mt-1">
+            Total active {title?.toLowerCase()}
+          </p>
         </div>
       </CardContent>
     </Card>

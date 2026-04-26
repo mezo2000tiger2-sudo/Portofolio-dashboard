@@ -42,20 +42,30 @@ export default function Home() {
   ]
 
   return (
-    <>
-    <div className="flex flex-col md:flex-row gap-5">
-      {cards.map((card) => (
-        <DashboardCard
-          key={card.title}
-          title={card.title}
-          count={card.count}
-          icon={card.icon}
-          isLoading={card.isLoading}
-        />
-      ))}
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
+        <p className="text-muted-foreground">
+          Welcome back! Here's what's happening with your platform today.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {cards.map((card) => (
+          <DashboardCard
+            key={card.title}
+            title={card.title}
+            count={card.count}
+            icon={card.icon}
+            isLoading={card.isLoading}
+          />
+        ))}
+      </div>
+      
+      <div className="grid gap-4">
+        <AnalyticsChart />
+        <PostTable limit={5} title="Recent Activity" />
+      </div>
     </div>
-    <AnalyticsChart/>
-    <PostTable limit={5}/>
-    </>
   )
 }

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Hash, UserCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, MessageSquare, Hash, UserCircle, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 const fetchPost = async (id: string | string[]) => {
   const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
@@ -54,85 +55,93 @@ export default function PostView() {
     );
   }
 
-  if (postError) return <div className="text-destructive p-6 font-mono">Error::Failed_to_load_resource</div>;
+  if (postError) return <div className="text-destructive p-6 font-mono bg-destructive/10 rounded-lg border border-destructive/20 m-8 text-center">Error: Failed to load resource</div>;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-in fade-in duration-500">
-      <Card className="border-slate-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950 overflow-hidden">
-        
-        {/* Header with Dark Mode subtle tint */}
-        <CardHeader className="space-y-4 pb-6 border-b dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/30">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" asChild className="-ml-2">
+          <Link href="/posts">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Posts
+          </Link>
+        </Button>
+      </div>
+
+      <Card className="border-border shadow-md bg-card overflow-hidden">
+        <CardHeader className="space-y-4 pb-8 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono text-xs bg-white dark:bg-zinc-900 border-slate-300 dark:border-zinc-700 dark:text-zinc-400">
+            <Badge variant="outline" className="font-mono text-xs bg-background border-border text-muted-foreground">
               <Hash className="w-3 h-3 mr-1" /> {post.id}
             </Badge>
-            <Badge variant="secondary" className="font-mono text-xs text-slate-500 dark:text-zinc-500 dark:bg-zinc-800">
-              <UserCircle className="w-3 h-3 mr-1" /> Author: {post.userId}
+            <Badge variant="secondary" className="font-mono text-xs text-muted-foreground">
+              <UserCircle className="w-3 h-3 mr-1" /> Author #{post.userId}
             </Badge>
           </div>
-          <CardTitle className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 capitalize leading-tight">
+          <CardTitle className="text-4xl font-extrabold tracking-tight text-foreground capitalize leading-tight">
             {post.title}
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="pt-8 pb-8">
-          <p className="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed italic border-l-4 border-blue-500/20 dark:border-blue-500/40 pl-6">
+        <CardContent className="py-12 px-8 md:px-12">
+          <p className="text-xl text-foreground/80 leading-relaxed font-medium border-l-4 border-primary/40 pl-8 py-2">
             {post.body}
           </p>
         </CardContent>
 
-        <CardFooter className="flex flex-col items-stretch gap-6 bg-slate-50/30 dark:bg-zinc-900/20 p-6 md:p-8">
+        <CardFooter className="flex flex-col items-stretch gap-8 bg-muted/10 p-8 md:p-12 border-t border-border">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-600">Discussion</h3>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold tracking-tight text-foreground">Discussion</h3>
+              <p className="text-sm text-muted-foreground">User comments and feedback</p>
+            </div>
             
             <div className="flex gap-2">
               {!comments ? (
                 <Button 
                   onClick={() => getComments()} 
                   disabled={commentsLoading}
-                  size="sm"
-                  className="dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white"
+                  className="shadow-sm"
                 >
                   {commentsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
-                  Fetch Comments
+                  Show Comments
                 </Button>
               ) : (
                 <Button 
                   variant="outline" 
-                  size="sm" 
                   onClick={() => setIsVisible(!isVisible)}
-                  className="bg-white dark:bg-zinc-900 border-slate-300 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="shadow-sm"
                 >
                   {isVisible ? (
-                    <><EyeOff className="mr-2 h-4 w-4" /> Hide</>
+                    <><EyeOff className="mr-2 h-4 w-4" /> Hide Discussion</>
                   ) : (
-                    <><Eye className="mr-2 h-4 w-4" /> Show ({comments.length})</>
+                    <><Eye className="mr-2 h-4 w-4" /> Show Discussion ({comments.length})</>
                   )}
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Comment Cards in Dark Mode */}
           {comments && isVisible && (
-            <div className="grid gap-4 animate-in zoom-in-95 duration-200">
+            <div className="grid gap-6 animate-in fade-in zoom-in-95 duration-300">
               {comments.map((comment: any) => (
                 <div 
                   key={comment.id} 
-                  className="p-5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-blue-400/50 dark:hover:border-blue-500/50 transition-all shadow-sm"
+                  className="p-6 rounded-2xl border border-border bg-card hover:bg-muted/30 transition-all shadow-sm"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-8 w-8 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold border border-blue-100 dark:border-blue-900/30">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold border border-primary/20">
                       {comment.email.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-zinc-200 truncate max-w-[200px]">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-foreground truncate">
                         {comment.email}
                       </p>
+                      <p className="text-xs text-muted-foreground">Posted on April 26, 2026</p>
                     </div>
                   </div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-zinc-300 mb-1 leading-snug capitalize">{comment.name}</h4>
-                  <p className="text-sm text-slate-500 dark:text-zinc-500 leading-normal">{comment.body}</p>
+                  <h4 className="text-md font-bold text-foreground mb-2 leading-snug capitalize">{comment.name}</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{comment.body}</p>
                 </div>
               ))}
             </div>

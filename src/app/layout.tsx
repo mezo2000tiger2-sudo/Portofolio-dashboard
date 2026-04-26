@@ -37,7 +37,7 @@ export default function RootLayout({
     >
       <Providers>
 
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-background">
         <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -45,14 +45,15 @@ export default function RootLayout({
             disableTransitionOnChange
           >
         <Navbar />
-        <div className="flex flex-1">
-          <div className="hidden md:block w-1/6">
+        <div className="flex flex-1 overflow-hidden">
+          <aside className="hidden md:block w-64 shrink-0">
             <Sidebar />
-          </div>
-          <div className="p-5 w-full md:max-w-285">
-
-        {children}
-          </div>
+          </aside>
+          <main className="flex-1 overflow-y-auto bg-muted/20 p-8">
+            <div className="max-w-6xl mx-auto">
+              {children}
+            </div>
+          </main>
         </div>
         </ThemeProvider>
       </body>
