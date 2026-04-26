@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { MessageCircle, Newspaper, User } from 'lucide-react'
 import DashboardCard from "./_components/Dashboard/DashboardCard"
-import PostTable from "./_components/Dashboard/PostTable"
+import PostTable from "./_components/posts/PostTable"
 import AnalyticsChart from "./_components/Dashboard/AnalyticsChart"
 
 const fetchPosts = () =>
