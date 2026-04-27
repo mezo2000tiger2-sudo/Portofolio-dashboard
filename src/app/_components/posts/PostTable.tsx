@@ -9,29 +9,27 @@ import { Eye } from 'lucide-react'
 
 interface PostTableProps {
     limit?: number,
+    skip?: number,
     title?: string
 }
 
-export default function PostTable({ limit, title }: PostTableProps) {
+export default function PostTable({ limit = 10, skip = 0, title }: PostTableProps) {
     const { data: postsData, isLoading } = useQuery<PostsResponse>({
-        queryKey: ['posts', { limit }],
-        queryFn: () => fetch(`https://dummyjson.com/posts${limit ? `?limit=${limit}` : ''}`).then(r => r.json())
+        queryKey: ['posts', { limit, skip }],
+        queryFn: () => fetch(`https://dummyjson.com/posts?limit=${limit}&skip=${skip}`).then(r => r.json())
     })
     
     const posts = postsData?.posts || []
 
     return (
-    <div className='mt-10 bg-card border border-border rounded-xl overflow-hidden shadow-sm'>
-        <div className="p-6 border-b border-border bg-muted/30 flex justify-between items-center">
-            <h3 className="text-xl font-bold tracking-tight text-foreground">
-                {title || "Recent Posts"}
-            </h3>
-            {limit && (
-                <Button variant="ghost" size="sm" asChild>
-                    <Link href="/posts">View All</Link>
-                </Button>
-            )}
-        </div>
+    <div className='bg-card border border-border rounded-xl overflow-hidden shadow-sm'>
+        {title && (
+            <div className="p-6 border-b border-border bg-muted/30 flex justify-between items-center">
+                <h3 className="text-xl font-bold tracking-tight text-foreground">
+                    {title}
+                </h3>
+            </div>
+        )}
         <Table>
             <TableHeader className="bg-muted/50">
                 <TableRow>
@@ -72,7 +70,7 @@ export default function PostTable({ limit, title }: PostTableProps) {
                         </TableRow>
                     ))}
                     {isLoading && (
-                        Array.from({ length: limit || 5 }).map((_, i) => (
+                        Array.from({ length: limit }).map((_, i) => (
                             <TableRow key={i}>
                                 <TableCell className="py-4 px-6"><div className="h-4 w-full bg-muted animate-pulse rounded" /></TableCell>
                                 <TableCell className="hidden lg:table-cell py-4 px-6"><div className="h-4 w-16 bg-muted animate-pulse rounded" /></TableCell>

@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { User, UsersResponse } from '@/types/User'
 import { 
@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Mail, Phone, Briefcase } from 'lucide-react'
+import { MoreHorizontal, Mail, Phone, Briefcase, Calendar, User as UserIcon } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,17 +23,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Separator } from '@/components/ui/separator'
 
-const fetchUsers = () =>
-  fetch("https://dummyjson.com/users").then(r => r.json())
+const fetchUsers = async (): Promise<UsersResponse> => {
+  const res = await fetch("https://dummyjson.com/users")
+  if (!res.ok) throw new Error("Failed to fetch users")
+  return res.json()
+}
 
 export default function UsersPage() {
   const { data: usersData, isLoading } = useQuery<UsersResponse>({
     queryKey: ["users"],
     queryFn: fetchUsers,
+    staleTime: 5 * 60 * 1000, 
   })
 
-  const users = usersData?.users || []
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+
+  const users = useMemo(() => usersData?.users || [], [usersData])
+
+  const handleViewProfile = (user: User) => {
+    setSelectedUser(user)
+    setIsProfileOpen(true)
+  }
 
   return (
     <div className="space-y-6">
@@ -41,10 +62,9 @@ export default function UsersPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
           <p className="text-muted-foreground">
-            Manage your team members and their account permissions.
+            View team members and their detailed profile information.
           </p>
         </div>
-        <Button>Add User</Button>
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
@@ -92,13 +112,13 @@ export default function UsersPage() {
                     variant={user.role === 'admin' ? 'default' : user.role === 'moderator' ? 'secondary' : 'outline'}
                     className="capitalize text-[10px]"
                   >
-                    {user.role}
+                    {user.role || 'user'}
                   </Badge>
                 </TableCell>
                 <TableCell className="py-4 px-6">
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-foreground">{user.company.name}</span>
-                    <span className="text-xs text-muted-foreground">{user.company.title}</span>
+                    <span className="text-sm font-medium text-foreground">{user.company?.name || 'N/A'}</span>
+                    <span className="text-xs text-muted-foreground">{user.company?.title || 'Member'}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-right py-4 px-6">
@@ -111,11 +131,8 @@ export default function UsersPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>View Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Edit Permissions</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive focus:text-destructive">
-                        Deactivate User
+                      <DropdownMenuItem onClick={() => handleViewProfile(user)}>
+                        View Profile
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -149,6 +166,74 @@ export default function UsersPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Profile Dialog */}
+      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>User Profile</DialogTitle>
+            <DialogDescription>
+              Detailed information about the user.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-6 pt-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 border-2 border-primary/10">
+                  <AvatarImage src={selectedUser.image} alt={`${selectedUser.firstName} ${selectedUser.lastName}`} />
+                  <AvatarFallback className="text-xl">
+                    {selectedUser.firstName[0]}{selectedUser.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-bold">{selectedUser.firstName} {selectedUser.lastName}</h3>
+                  <p className="text-sm text-muted-foreground">@{selectedUser.username}</p>
+                  <Badge className="mt-1 capitalize">{selectedUser.role || 'user'}</Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Mail className="h-3 w-3" /> Email
+                  </p>
+                  <p className="text-sm truncate">{selectedUser.email}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Phone className="h-3 w-3" /> Phone
+                  </p>
+                  <p className="text-sm">{selectedUser.phone || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Briefcase className="h-3 w-3" /> Company
+                  </p>
+                  <p className="text-sm font-medium">{selectedUser.company?.name || 'N/A'}</p>
+                  <p className="text-xs text-muted-foreground">{selectedUser.company?.title || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" /> Birth Date
+                  </p>
+                  <p className="text-sm">{selectedUser.birthDate || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <UserIcon className="h-3 w-3" /> Personal
+                  </p>
+                  <p className="text-sm">{selectedUser.age || 'N/A'} years old, {selectedUser.gender || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="mt-6">
+            <Button onClick={() => setIsProfileOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

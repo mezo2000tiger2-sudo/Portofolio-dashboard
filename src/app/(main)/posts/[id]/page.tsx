@@ -40,13 +40,15 @@ export default function PostView() {
   });
 
   const { 
-    mutate: getComments, 
-    data: comments, 
-    isPending: commentsLoading 
-  } = useMutation({
-    mutationFn: () => fetchComments(id as string),
-    onSuccess: () => setIsVisible(true),
-  });
+  mutate: getComments, 
+  data: comments, // This will be the array of comments once fetched
+  isPending: commentsLoading 
+} = useMutation({
+  mutationFn: () => fetchComments(id as string),
+  onSuccess: () => {
+    setIsVisible(true);
+  },
+});
 
   if (postLoading) {
     return (
@@ -135,25 +137,30 @@ export default function PostView() {
           {comments && isVisible && (
             <div className="grid gap-6 animate-in fade-in zoom-in-95 duration-300">
               {comments.map((comment: any) => (
-                <div 
-                  key={comment.id} 
-                  className="p-6 rounded-2xl border border-border bg-card hover:bg-muted/30 transition-all shadow-sm"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold border border-primary/20">
-                      {comment.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-foreground truncate">
-                        {comment.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Posted on April 26, 2026</p>
-                    </div>
-                  </div>
-                  <h4 className="text-md font-bold text-foreground mb-2 leading-snug capitalize">{comment.name}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{comment.body}</p>
-                </div>
-              ))}
+  <div 
+    key={comment.id} 
+    className="p-6 rounded-2xl border border-border bg-card hover:bg-muted/30 transition-all shadow-sm"
+  >
+    <div className="flex items-center gap-4 mb-4">
+      <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold border border-primary/20">
+        {/* FIX 1: Use user.username instead of email */}
+        {comment.user?.username?.charAt(0).toUpperCase() || "?"}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-foreground truncate">
+          {/* FIX 2: Use user.username instead of email */}
+          {comment.user?.username}
+        </p>
+        <p className="text-xs text-muted-foreground">Posted on April 26, 2026</p>
+      </div>
+    </div>
+    {/* FIX 3: Removed comment.name (it doesn't exist in this API) 
+        and kept comment.body (which is the actual message) */}
+    <p className="text-sm text-muted-foreground leading-relaxed">
+      {comment.body}
+    </p>
+  </div>
+))}
             </div>
           )}
         </CardFooter>
