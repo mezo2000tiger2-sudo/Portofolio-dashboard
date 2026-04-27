@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { User, UsersResponse } from '@/types/User'
 import { 
@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Mail, Phone, Briefcase, Calendar, User as UserIcon } from 'lucide-react'
+import { MoreHorizontal, Mail, Phone, Briefcase, Calendar, User as UserIcon, Search, ShieldCheck, UserCog, Users } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,24 +32,55 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
 
-const fetchUsers = async (): Promise<UsersResponse> => {
-  const res = await fetch("https://dummyjson.com/users")
+const fetchUsers = async (search: string): Promise<UsersResponse> => {
+  const baseUrl = search 
+    ? `https://dummyjson.com/users/search?q=${search}` 
+    : `https://dummyjson.com/users?limit=100` 
+  
+  const res = await fetch(baseUrl)
   if (!res.ok) throw new Error("Failed to fetch users")
   return res.json()
 }
 
 export default function UsersPage() {
+  const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 500)
+    return () => clearTimeout(timer)
+  }, [search])
+
   const { data: usersData, isLoading } = useQuery<UsersResponse>({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
+    queryKey: ["users", debouncedSearch],
+    queryFn: () => fetchUsers(debouncedSearch),
     staleTime: 5 * 60 * 1000, 
   })
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
 
-  const users = useMemo(() => usersData?.users || [], [usersData])
+  // Strict Role Priority Map
+  const rolePriority: Record<string, number> = {
+    admin: 1,
+    moderator: 2,
+    user: 3
+  }
+
+  const users = useMemo(() => {
+    const rawUsers = usersData?.users || []
+    return [...rawUsers].sort((a, b) => {
+      const priorityA = rolePriority[a.role] || 4
+      const priorityB = rolePriority[b.role] || 4
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB
+      }
+      return a.firstName.localeCompare(b.firstName)
+    })
+  }, [usersData])
 
   const handleViewProfile = (user: User) => {
     setSelectedUser(user)
@@ -58,12 +89,21 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
           <p className="text-muted-foreground">
-            View team members and their detailed profile information.
+            Administrative overview prioritized by role: Admins first, then Moderators.
           </p>
+        </div>
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search users..." 
+            className="pl-9 h-10"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
 
@@ -73,7 +113,7 @@ export default function UsersPage() {
             <TableRow>
               <TableHead className="w-[250px] font-semibold py-4 px-6">User</TableHead>
               <TableHead className="font-semibold py-4 px-6">Contact</TableHead>
-              <TableHead className="font-semibold py-4 px-6">Role</TableHead>
+              <TableHead className="font-semibold py-4 px-6">Role / Level</TableHead>
               <TableHead className="font-semibold py-4 px-6">Company</TableHead>
               <TableHead className="text-right font-semibold py-4 px-6">Actions</TableHead>
             </TableRow>
@@ -108,12 +148,17 @@ export default function UsersPage() {
                   </div>
                 </TableCell>
                 <TableCell className="py-4 px-6">
-                  <Badge 
-                    variant={user.role === 'admin' ? 'default' : user.role === 'moderator' ? 'secondary' : 'outline'}
-                    className="capitalize text-[10px]"
-                  >
-                    {user.role || 'user'}
-                  </Badge>
+                   <div className="flex items-center gap-2">
+                    {user.role === 'admin' && <ShieldCheck className="h-3.5 w-3.5 text-primary" />}
+                    {user.role === 'moderator' && <UserCog className="h-3.5 w-3.5 text-secondary-foreground" />}
+                    {user.role === 'user' && <Users className="h-3.5 w-3.5 text-muted-foreground" />}
+                    <Badge 
+                      variant={user.role === 'admin' ? 'default' : user.role === 'moderator' ? 'secondary' : 'outline'}
+                      className="capitalize text-[10px]"
+                    >
+                      {user.role || 'user'}
+                    </Badge>
+                  </div>
                 </TableCell>
                 <TableCell className="py-4 px-6">
                   <div className="flex flex-col">
@@ -131,7 +176,7 @@ export default function UsersPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleViewProfile(user)}>
+                      <DropdownMenuItem onClick={() => handleViewProfile(user)} className="cursor-pointer">
                         View Profile
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -162,6 +207,13 @@ export default function UsersPage() {
                   <TableCell className="py-4 px-6"><div className="h-8 w-8 bg-muted animate-pulse rounded ml-auto" /></TableCell>
                 </TableRow>
               ))
+            )}
+            {!isLoading && users.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                  No users found matching your search.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

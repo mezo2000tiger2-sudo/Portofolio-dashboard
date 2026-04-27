@@ -1,11 +1,19 @@
 "use client"
 
+import React, { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { MessageCircle, Newspaper, User } from 'lucide-react'
+import { MessageCircle, Newspaper, User, ArrowUpDown, TrendingUp, ThumbsUp, Type, Clock } from 'lucide-react'
 import DashboardCard from "../_components/Dashboard/DashboardCard"
 import PostTable from "../_components/posts/PostTable"
 import AnalyticsChart from "../_components/Dashboard/AnalyticsChart"
 import RecentActivity from "../_components/Dashboard/RecentActivity"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const fetchPosts = () =>
   fetch("https://dummyjson.com/posts").then(r => r.json())
@@ -20,6 +28,14 @@ export default function Home() {
   const { data: postsData, isLoading: postsLoading } = useQuery({ queryKey: ["posts"], queryFn: fetchPosts })
   const { data: usersData, isLoading: usersLoading } = useQuery({ queryKey: ["users"], queryFn: fetchUsers })
   const { data: commentsData, isLoading: commentsLoading } = useQuery({ queryKey: ["comments"], queryFn: fetchComments })
+
+  const sortOptions = [
+    { key: 'reactions', order: 'desc', label: 'Most Liked', icon: <ThumbsUp className="mr-2 h-4 w-4" /> },
+    { key: 'id', order: 'desc', label: 'Latest', icon: <Clock className="mr-2 h-4 w-4" /> },
+    { key: 'title', order: 'asc', label: 'Alphabetical', icon: <Type className="mr-2 h-4 w-4" /> },
+  ]
+
+  const [sortConfig, setSortConfig] = useState(sortOptions[0])
 
   const cards = [
     {
@@ -72,8 +88,35 @@ export default function Home() {
         </div>
       </div>
       
-      <div className="grid gap-4">
-        <PostTable limit={5} title="Latest Posts" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="text-xl font-bold tracking-tight">Top Content</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-2">
+                <ArrowUpDown className="h-4 w-4" />
+                Sort By: {sortConfig.label}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {sortOptions.map((option) => (
+                <DropdownMenuItem 
+                  key={option.label} 
+                  onClick={() => setSortConfig(option)}
+                  className="cursor-pointer"
+                >
+                  {option.icon}
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <PostTable 
+          limit={5} 
+          sortBy={sortConfig.key} 
+          order={sortConfig.order} 
+        />
       </div>
     </div>
   )

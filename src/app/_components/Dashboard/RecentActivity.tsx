@@ -8,7 +8,7 @@ import { MessageSquare, User, Clock } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 const fetchRecentComments = () =>
-  fetch("https://dummyjson.com/comments?limit=5").then(r => r.json())
+  fetch("https://dummyjson.com/comments?limit=5&sortBy=likes&order=desc").then(r => r.json())
 
 export default function RecentActivity() {
   const { data: commentsData, isLoading } = useQuery<CommentsResponse>({

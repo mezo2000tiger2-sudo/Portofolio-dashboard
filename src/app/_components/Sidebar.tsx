@@ -10,7 +10,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import Link from 'next/link'
-import { LayoutDashboard, Newspaper, User, Settings } from 'lucide-react'
+import { LayoutDashboard, Newspaper, User, Settings, MessageSquare } from 'lucide-react'
 
 export default function Sidebar() {
   return (
@@ -34,20 +34,11 @@ export default function Sidebar() {
               <User className='h-4 w-4 text-muted-foreground group-aria-selected:text-foreground' />
               <Link href="/users" className="flex-1 font-medium">Users</Link>
             </CommandItem>
+            <CommandItem className="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors aria-selected:bg-accent aria-selected:text-accent-foreground rounded-md group">
+              <MessageSquare className='h-4 w-4 text-muted-foreground group-aria-selected:text-foreground' />
+              <Link href="/comments" className="flex-1 font-medium">Comments</Link>
+            </CommandItem>
           </CommandGroup>
-          {/* <CommandSeparator className="my-4 mx-3" />
-          <CommandGroup heading="Settings" className="px-2">
-            <CommandItem className="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors aria-selected:bg-accent aria-selected:text-accent-foreground rounded-md group">
-              <User className='h-4 w-4 text-muted-foreground group-aria-selected:text-foreground' />
-              <Link href="/profile" className="flex-1 font-medium">Profile</Link>
-              <CommandShortcut className="text-[10px] font-medium opacity-60">⌘P</CommandShortcut>
-            </CommandItem>
-            <CommandItem className="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors aria-selected:bg-accent aria-selected:text-accent-foreground rounded-md group">
-              <Settings className='h-4 w-4 text-muted-foreground group-aria-selected:text-foreground' />
-              <Link href="/settings" className="flex-1 font-medium">Settings</Link>
-              <CommandShortcut className="text-[10px] font-medium opacity-60">⌘S</CommandShortcut>
-            </CommandItem>
-          </CommandGroup> */}
         </CommandList>
       </Command>
     </div>
