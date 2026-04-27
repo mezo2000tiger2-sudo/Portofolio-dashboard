@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Mail, Phone, Briefcase, Calendar, User as UserIcon, Search, ShieldCheck, UserCog, Users } from 'lucide-react'
+import { MoreHorizontal, Mail, Phone, Search, ShieldCheck, UserCog, Users, AlertCircle } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +53,7 @@ export default function UsersPage() {
     return () => clearTimeout(timer)
   }, [search])
 
-  const { data: usersData, isLoading } = useQuery<UsersResponse>({
+  const { data: usersData, isLoading, isError, error } = useQuery<UsersResponse>({
     queryKey: ["users", debouncedSearch],
     queryFn: () => fetchUsers(debouncedSearch),
     staleTime: 5 * 60 * 1000, 
@@ -85,6 +85,19 @@ export default function UsersPage() {
   const handleViewProfile = (user: User) => {
     setSelectedUser(user)
     setIsProfileOpen(true)
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-12 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-destructive">Unable to load users</h2>
+        <p className="text-muted-foreground mt-2 max-w-md mx-auto">{error?.message}</p>
+        <Button variant="outline" className="mt-6" onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    )
   }
 
   return (

@@ -15,19 +15,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-const fetchPosts = () =>
-  fetch("https://dummyjson.com/posts").then(r => r.json())
+const fetchPosts = async () => {
+  const res = await fetch("https://dummyjson.com/posts")
+  if (!res.ok) throw new Error("Failed to fetch posts")
+  return res.json()
+}
 
-const fetchUsers = () =>
-  fetch("https://dummyjson.com/users").then(r => r.json())
+const fetchUsers = async () => {
+  const res = await fetch("https://dummyjson.com/users")
+  if (!res.ok) throw new Error("Failed to fetch users")
+  return res.json()
+}
 
-const fetchComments = () =>
-  fetch("https://dummyjson.com/comments").then(r => r.json())
+const fetchComments = async () => {
+  const res = await fetch("https://dummyjson.com/comments")
+  if (!res.ok) throw new Error("Failed to fetch comments")
+  return res.json()
+}
 
 export default function Home() {
-  const { data: postsData, isLoading: postsLoading } = useQuery({ queryKey: ["posts"], queryFn: fetchPosts })
-  const { data: usersData, isLoading: usersLoading } = useQuery({ queryKey: ["users"], queryFn: fetchUsers })
-  const { data: commentsData, isLoading: commentsLoading } = useQuery({ queryKey: ["comments"], queryFn: fetchComments })
+  const { data: postsData, isLoading: postsLoading, isError: postsError } = useQuery({ queryKey: ["posts-stats"], queryFn: fetchPosts })
+  const { data: usersData, isLoading: usersLoading, isError: usersError } = useQuery({ queryKey: ["users-stats"], queryFn: fetchUsers })
+  const { data: commentsData, isLoading: commentsLoading, isError: commentsError } = useQuery({ queryKey: ["comments-stats"], queryFn: fetchComments })
 
   const sortOptions = [
     { key: 'reactions', order: 'desc', label: 'Most Liked', icon: <ThumbsUp className="mr-2 h-4 w-4" /> },
@@ -43,18 +52,21 @@ export default function Home() {
       count: postsData?.total,
       icon: <Newspaper className="text-muted-foreground" />,
       isLoading: postsLoading,
+      isError: postsError,
     },
     {
       title: "Users",
       count: usersData?.total,
       icon: <User className="text-muted-foreground" />,
       isLoading: usersLoading,
+      isError: usersError,
     },
     {
       title: "Comments",
       count: commentsData?.total,
       icon: <MessageCircle className="text-muted-foreground" />,
       isLoading: commentsLoading,
+      isError: commentsError,
     },
   ]
 
@@ -75,6 +87,7 @@ export default function Home() {
             count={card.count}
             icon={card.icon}
             isLoading={card.isLoading}
+            isError={card.isError}
           />
         ))}
       </div>

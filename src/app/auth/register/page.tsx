@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { registerSchema, RegisterValues } from "@/lib/auth-schemas"
-import { Loader2 } from "lucide-react"
+import { Loader2, Info } from "lucide-react"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -49,8 +49,7 @@ export default function RegisterPage() {
       return response.json()
     },
     onSuccess: () => {
-      // Registration successful, redirect to login
-      router.push("/auth/login?registered=true")
+      router.push("/auth/login?registered=true&demo=true")
     },
     onError: (error: Error) => {
       form.setError("root", { message: error.message })
@@ -70,6 +69,13 @@ export default function RegisterPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md flex items-start gap-3">
+          <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-blue-600 leading-relaxed">
+            <strong>Demo Notice:</strong> This dashboard uses DummyJSON. Registration is simulated. After "joining", please use a test account like <strong>emilys</strong> (pass: <strong>emilyspass</strong>) to log in.
+          </p>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {form.formState.errors.root && (

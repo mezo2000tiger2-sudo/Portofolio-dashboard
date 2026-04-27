@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginSchema, LoginValues } from "@/lib/auth-schemas"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -33,14 +33,10 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (values: LoginValues) => {
-      const response = await fetch("https://dummyjson.com/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: values.username,
-          password: values.password,
-          expiresInMins: 60,
-        }),
+        body: JSON.stringify(values),
       })
 
       if (!response.ok) {
@@ -50,13 +46,8 @@ export default function LoginPage() {
 
       return response.json()
     },
-    onSuccess: (data) => {
-      // Store user data for UI
-      localStorage.setItem("user", JSON.stringify(data))
-      
-      // Set a cookie for the Middleware to read (server-side protection)
-      document.cookie = `auth_token=${data.accessToken}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
-      
+    onSuccess: (safeUser) => {
+      localStorage.setItem("user", JSON.stringify(safeUser))
       router.push("/")
       router.refresh()
     },
@@ -81,7 +72,8 @@ export default function LoginPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {form.formState.errors.root && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-md text-center font-medium">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-md text-center font-medium flex items-center justify-center gap-2">
+                <AlertCircle className="h-4 w-4" />
                 {form.formState.errors.root.message}
               </div>
             )}

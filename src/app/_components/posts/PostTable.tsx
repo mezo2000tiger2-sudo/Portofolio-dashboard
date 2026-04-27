@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
+import { AlertCircle } from 'lucide-react'
 
 interface PostTableProps {
     limit?: number,
@@ -23,14 +24,15 @@ export default function PostTable({
   order = "desc", 
   title 
 }: PostTableProps) {
-    // Fetch data. Note: API doesn't support sortBy/order when searching.
-    const { data: postsData, isLoading } = useQuery<PostsResponse>({
+    const { data: postsData, isLoading, isError, error } = useQuery<PostsResponse>({
         queryKey: ['posts', { limit, skip, search, sortBy, order }],
         queryFn: async () => {
           const baseUrl = search 
-            ? `https://dummyjson.com/posts/search?q=${search}&limit=100` // Fetch more for local sorting
+            ? `https://dummyjson.com/posts/search?q=${search}&limit=100`
             : `https://dummyjson.com/posts?limit=${limit}&skip=${skip}&sortBy=${sortBy}&order=${order}`
-          return fetch(baseUrl).then(r => r.json())
+          const res = await fetch(baseUrl)
+          if (!res.ok) throw new Error("Failed to fetch posts")
+          return res.json()
         }
     })
     
@@ -41,17 +43,14 @@ export default function PostTable({
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     }
 
-    // RELIABLE SORTING ENGINE
     const sortedPosts = useMemo(() => {
       let posts = postsData?.posts || []
       
-      // If we are searching, the API didn't sort for us. We must do it locally.
-      if (search || true) { // Apply locally to be 100% safe
+      if (search || true) { 
         posts = [...posts].sort((a, b) => {
           let valA: any = a[sortBy as keyof Post]
           let valB: any = b[sortBy as keyof Post]
 
-          // Handle special cases like reactions object
           if (sortBy === 'reactions') {
             valA = a.reactions?.likes || 0
             valB = b.reactions?.likes || 0
@@ -65,9 +64,18 @@ export default function PostTable({
         })
       }
       
-      // Apply pagination window to the sorted results if we fetched a larger set
       return search ? posts.slice(skip, skip + limit) : posts.slice(0, limit)
     }, [postsData, sortBy, order, search, skip, limit])
+
+    if (isError) {
+      return (
+        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-8 text-center">
+          <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-destructive">Failed to load posts</h3>
+          <p className="text-sm text-destructive/80 mt-1">{error?.message}</p>
+        </div>
+      )
+    }
 
     return (
     <div className='bg-card border border-border rounded-xl overflow-hidden shadow-sm'>
@@ -123,6 +131,13 @@ export default function PostTable({
                             <TableCell className="py-4 px-6"><div className="h-8 w-16 bg-muted animate-pulse rounded ml-auto" /></TableCell>
                         </TableRow>
                     ))}
+                    {!isLoading && sortedPosts.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="py-10 text-center text-muted-foreground italic">
+                          No posts found matching your criteria.
+                        </TableCell>
+                      </TableRow>
+                    )}
             </TableBody>
         </Table>
     </div>

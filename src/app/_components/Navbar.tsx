@@ -19,21 +19,46 @@ import MobileSidebar from './MobileSidebar'
 export default function Navbar() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (e) {
+        localStorage.removeItem("user")
+      }
     }
   }, [])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Clear client-side state
     localStorage.removeItem("user")
-    // Clear cookie
-    document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setUser(null)
+    
+    // Clear server-side cookies via API route
+    await fetch("/api/auth/logout", { method: "POST" })
+    
     router.push("/auth/login")
     router.refresh()
+  }
+
+  // Avoid hydration mismatch by not rendering user-specific UI until mounted
+  if (!mounted) {
+    return (
+      <div className='bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border py-3 px-6 flex justify-between items-center'>
+        <div className="flex items-center gap-4">
+          <MobileSidebar />
+          <div className="text-xl font-bold tracking-tight text-foreground">Dashboard</div>
+        </div>
+        <div className="flex items-center gap-4">
+          <LightAndDarkToggler />
+          <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -50,7 +75,7 @@ export default function Navbar() {
           <DropdownMenuTrigger className='focus:outline-none ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full'>
             <Avatar className="h-9 w-9 border border-border">
               <AvatarImage
-                src={user?.image || "https://github.com/shadcn.png"}
+                src={user?.image || ""}
                 alt={user?.username || "@user"}
               />
               <AvatarFallback className='bg-muted text-muted-foreground text-xs'>
@@ -64,8 +89,8 @@ export default function Navbar() {
                 <p className="text-sm font-medium leading-none">
                   {user ? `${user.firstName} ${user.lastName}` : "Guest User"}
                 </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email || "Connect to access features"}
+                <p className="text-xs leading-none text-muted-foreground truncate">
+                  {user?.email || "Sign in to access features"}
                 </p>
               </div>
             </DropdownMenuLabel>

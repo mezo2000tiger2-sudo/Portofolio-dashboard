@@ -4,19 +4,46 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CommentsResponse, Comment } from '@/types/Comment'
-import { MessageSquare, User, Clock } from 'lucide-react'
+import { Clock, AlertCircle } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
-const fetchRecentComments = () =>
-  fetch("https://dummyjson.com/comments?limit=5&sortBy=likes&order=desc").then(r => r.json())
+const fetchRecentComments = async (): Promise<CommentsResponse> => {
+  const res = await fetch("https://dummyjson.com/comments?limit=5&sortBy=likes&order=desc")
+  if (!res.ok) throw new Error("Failed to fetch comments")
+  return res.json()
+}
+
+// Vanilla JS helper for relative time (Task 6)
+function getRelativeTime(id: number) {
+  // DummyJSON comments don't have dates, so we simulate based on ID
+  const now = Date.now()
+  const minutesAgo = (id % 60) + 1
+  const diff = minutesAgo * 60 * 1000
+  const date = new Date(now - diff)
+  
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+  return rtf.format(-minutesAgo, 'minute')
+}
 
 export default function RecentActivity() {
-  const { data: commentsData, isLoading } = useQuery<CommentsResponse>({
+  const { data: commentsData, isLoading, isError, error } = useQuery<CommentsResponse>({
     queryKey: ["recent-comments"],
     queryFn: fetchRecentComments,
   })
 
   const comments = commentsData?.comments || []
+
+  if (isError) {
+    return (
+      <Card className="border-destructive/20 bg-destructive/5 shadow-sm h-full">
+        <CardContent className="flex flex-col items-center justify-center py-10 text-center">
+          <AlertCircle className="h-10 w-10 text-destructive mb-3" />
+          <p className="text-sm font-medium text-destructive">Failed to load activity</p>
+          <p className="text-xs text-destructive/80 mt-1">{error?.message}</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="border-border bg-card shadow-sm h-full">
@@ -42,7 +69,7 @@ export default function RecentActivity() {
                   </span>
                   <span className="text-[10px] text-muted-foreground flex items-center gap-1 shrink-0">
                     <Clock className="h-2.5 w-2.5" />
-                    2h ago
+                    {getRelativeTime(comment.id)} {/* Task 6: replace hardcoded '2h ago' */}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-2 italic">
@@ -70,6 +97,10 @@ export default function RecentActivity() {
                 </div>
               </div>
             ))
+          )}
+
+          {!isLoading && comments.length === 0 && (
+            <p className="text-sm text-center text-muted-foreground py-10">No recent activity found.</p>
           )}
         </div>
       </CardContent>

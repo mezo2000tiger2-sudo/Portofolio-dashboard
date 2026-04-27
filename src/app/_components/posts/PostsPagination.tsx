@@ -36,6 +36,37 @@ export default function PostsPagination({ currentPage, total, limit, onPageChang
     onPageChange(page)
   }
 
+  // Task 7: Implement windowed pagination with ellipsis
+  const getPageNumbers = () => {
+    const pages = []
+    const window = 2 // Pages to show around current page
+    
+    // Always show first page
+    pages.push(1)
+
+    // Gap after first page
+    if (currentPage > window + 2) {
+      pages.push('ellipsis-start')
+    }
+
+    // Pages around current
+    for (let i = Math.max(2, currentPage - window); i <= Math.min(totalPages - 1, currentPage + window); i++) {
+      pages.push(i)
+    }
+
+    // Gap before last page
+    if (currentPage < totalPages - window - 1) {
+      pages.push('ellipsis-end')
+    }
+
+    // Always show last page if more than 1 page
+    if (totalPages > 1) {
+      pages.push(totalPages)
+    }
+
+    return pages
+  }
+
   return (
     <div className="py-4">
       <Pagination>
@@ -48,9 +79,16 @@ export default function PostsPagination({ currentPage, total, limit, onPageChang
             />
           </PaginationItem>
           
-          {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-            // Simple window logic: show first 5 pages for now
-            const pageNum = i + 1
+          {getPageNumbers().map((p, idx) => {
+            if (p === 'ellipsis-start' || p === 'ellipsis-end') {
+              return (
+                <PaginationItem key={`${p}-${idx}`}>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )
+            }
+
+            const pageNum = p as number
             return (
               <PaginationItem key={pageNum}>
                 <PaginationLink 
@@ -64,12 +102,6 @@ export default function PostsPagination({ currentPage, total, limit, onPageChang
               </PaginationItem>
             )
           })}
-
-          {totalPages > 5 && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-          )}
           
           <PaginationItem>
             <PaginationNext 
