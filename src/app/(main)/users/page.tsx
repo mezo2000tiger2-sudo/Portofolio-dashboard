@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Mail, Phone, Search, ShieldCheck, UserCog, Users, AlertCircle } from 'lucide-react'
+import { MoreHorizontal, Mail, Phone, Search, ShieldCheck, UserCog, Users, AlertCircle, Briefcase, Calendar, User as UserIcon } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,

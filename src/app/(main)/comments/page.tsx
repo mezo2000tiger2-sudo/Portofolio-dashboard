@@ -41,13 +41,26 @@ export default function CommentsPage() {
 
   const [sortConfig, setSortConfig] = useState(sortOptions[0])
 
-  const { data: commentsData, isLoading } = useQuery<CommentsResponse>({
-    queryKey: ["comments", limit, skip, sortConfig],
+  const { data: commentsData, isLoading, isError, error } = useQuery<CommentsResponse>({
+    queryKey: ["comments", limit, skip, sortConfig.key, sortConfig.order],
     queryFn: () => fetchComments(limit, skip, sortConfig.key, sortConfig.order),
     staleTime: 5 * 60 * 1000,
   })
 
   const comments = useMemo(() => commentsData?.comments || [], [commentsData])
+
+  if (isError) {
+    return (
+      <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-12 text-center">
+        <Clock className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-destructive">Unable to load comments</h2>
+        <p className="text-muted-foreground mt-2 max-w-md mx-auto">{error?.message}</p>
+        <Button variant="outline" className="mt-6" onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
